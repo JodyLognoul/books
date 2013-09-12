@@ -35,6 +35,7 @@
             });
         },
         showInfo: function( inputValues ) {
+
             var self = this,
                 isbnNumbers = inputValues.match(/\w+/g),
                 i;
@@ -57,31 +58,43 @@
                             i--;
                             if( data.totalItems === 0){
                                 $('.output-no-found').append("<p><b>"+ isbn +"</b></p>");
+                                self.csvContent +='"' + isbn + '","No information found :("\n';
                             }else if(data.totalItems > 1){
+                                self.csvContent +='"' + isbn + '","Too much book found for this isbn :("\n';
                                 $('.output-no-found').append("<p><b>Too much book found for the isbn: " + isbn +"</b></p>");
-                                console.log();
-                            }else{
+
+                            }else if(data.totalItems === 1) {
+                                console.log('data.totalItems === 1'); 
                                 $('.output-found').append("<p>Title : <b>"+data.items[0].volumeInfo.title+"</b> - Authors: <b>"+data.items[0].volumeInfo.authors+"</b></p>");
                                 self.csvContent +=
-                                    data.items[0].volumeInfo.title + ',' +
-                                    data.items[0].volumeInfo.authors + '\n';
-                                self.generateCsv( self.csvContent );
+                                    '"' + 
+                                    isbn + '","' +
+                                    data.items[0].volumeInfo.title + '","' +
+                                    data.items[0].volumeInfo.authors + '","' +
+                                    data.items[0].volumeInfo.publisher + '","' +
+                                    data.items[0].volumeInfo.publishedDate + '","' +
+                                    data.items[0].volumeInfo.description + '","' +
+                                    data.items[0].volumeInfo.pageCount + '","' +
+                                    data.items[0].volumeInfo.language + '"\n';                                
                             }
                             if (i === 0) {
-                                self.toggleLoading();
+                                self.toggleLoading();                                
                             }
+                            self.generateCsv( self.csvContent );
                         }
                     });
                 }); // END FOREACH
             }else{
                 self.clearOutputs();
                 self.toggleLoading();
+                self.generateCsv( self.csvContent );
             }
         },
         clearOutputs: function(){
             $('.output-no-found').empty();
             $('.output-found').empty();
-            this.csvContent = '';
+            this.csvContent = '"ISBN","Title","Authors","Publisher","Published Date","Description","Page Count","Language"\n';
+            console.log(this.csvContent); 
         },
         generateCsv: function( csvContent ){
             var encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
