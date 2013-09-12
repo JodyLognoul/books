@@ -37,41 +37,48 @@
         showInfo: function( inputValues ) {
             var self = this,
                 isbnNumbers = inputValues.match(/\w+/g),
+                i;
+
+            if ( isbnNumbers !== null ) {
+                
                 i = isbnNumbers.length;
-                console.log(i); 
-            
-            self.refreshCsv();
-            
-            isbnNumbers.forEach(function(isbn){   // FOREACH
-                $.ajax({
-                    url: 'https://www.googleapis.com/books/v1/volumes',
-                    dataType: 'jsonp',
-                    data: {
-                        q : "id:" + isbn,
-                        key: "AIzaSyDI31ZBJbrhST7-RK-crm0XC2wY6vNlj7I"
-                    },
-                    success: function( data ){
-                        i--;
-                        if( data.totalItems === 0){
-                            $('.output-no-found').append("<p><b>"+ isbn +"</b></p>");
-                        }else if(data.totalItems > 1){
-                            $('.output-no-found').append("<p><b>Too much book found for the isbn: " + isbn +"</b></p>");
-                            console.log();
-                        }else{
-                            $('.output-found').append("<p>Title : <b>"+data.items[0].volumeInfo.title+"</b> - Authors: <b>"+data.items[0].volumeInfo.authors+"</b></p>");
-                            self.csvContent +=
-                                data.items[0].volumeInfo.title + ',' +
-                                data.items[0].volumeInfo.authors + '\n';
-                            self.generateCsv( self.csvContent );
+
+                self.clearOutputs();
+                
+                isbnNumbers.forEach(function(isbn){   // FOREACH
+                    $.ajax({
+                        url: 'https://www.googleapis.com/books/v1/volumes',
+                        dataType: 'jsonp',
+                        data: {
+                            q : "id:" + isbn,
+                            key: "AIzaSyDI31ZBJbrhST7-RK-crm0XC2wY6vNlj7I"
+                        },
+                        success: function( data ){
+                            i--;
+                            if( data.totalItems === 0){
+                                $('.output-no-found').append("<p><b>"+ isbn +"</b></p>");
+                            }else if(data.totalItems > 1){
+                                $('.output-no-found').append("<p><b>Too much book found for the isbn: " + isbn +"</b></p>");
+                                console.log();
+                            }else{
+                                $('.output-found').append("<p>Title : <b>"+data.items[0].volumeInfo.title+"</b> - Authors: <b>"+data.items[0].volumeInfo.authors+"</b></p>");
+                                self.csvContent +=
+                                    data.items[0].volumeInfo.title + ',' +
+                                    data.items[0].volumeInfo.authors + '\n';
+                                self.generateCsv( self.csvContent );
+                            }
+                            if (i === 0) {
+                                self.toggleLoading();
+                            }
                         }
-                        if (i === 0) {
-                            self.toggleLoading();
-                        }
-                    }
-                });
-            }); // END FOREACH
+                    });
+                }); // END FOREACH
+            }else{
+                self.clearOutputs();
+                self.toggleLoading();
+            }
         },
-        refreshCsv: function(){
+        clearOutputs: function(){
             $('.output-no-found').empty();
             $('.output-found').empty();
             this.csvContent = '';
@@ -81,7 +88,7 @@
             $('.dl').attr("href", encodedUri);
             $('.dl').attr("download", "my_data.csv");
         },
-        toggleLoading:function(){
+        toggleLoading: function(){
             $('.dl').toggle();
             $('.ajax-loader-gif').toggle();
         }
