@@ -1,4 +1,5 @@
 /* jshint unused:true */
+/* jshint trailing:false */
 /* global jQuery:false */
 /*
 9782070327249
@@ -22,14 +23,13 @@
             delayedCallback,
             inputValues;
 
-            $input.on('keyup change',function(){
+            $input.on('keyup',function(){
                 inputValues = $(this).val();
 
-                self.toggleLoading();
-                
                 clearTimeout( delayedCallback );
 
                 delayedCallback = setTimeout(function(){
+                    self.toggleLoading();
                     self.showInfo( inputValues );
                 },800);
             });
@@ -55,7 +55,8 @@
                         if( data.totalItems === 0){
                             $('.output-no-found').append("<p><b>"+ isbn +"</b></p>");
                         }else if(data.totalItems > 1){
-                            console.log("Too much book found for the isbn: " + isbn);
+                            $('.output-no-found').append("<p><b>Too much book found for the isbn: " + isbn +"</b></p>");
+                            console.log();
                         }else{
                             $('.output-found').append("<p>Title : <b>"+data.items[0].volumeInfo.title+"</b> - Authors: <b>"+data.items[0].volumeInfo.authors+"</b></p>");
                             self.csvContent +=
